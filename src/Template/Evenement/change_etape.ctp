@@ -41,21 +41,48 @@
                         $('#etape_encours').html('Introduction');
                         $('#ChronoApplaud').addClass('disabled');
                         $('#active_speaker').addClass('disabled');
+
+                        if(!$('#speaking-start').hasClass('disabled')) {
+                            $("#speaking-start").addClass('disabled');
+                        }
+                        if(!$('#show-front').hasClass('disabled')) {
+                            $("#show-front").addClass('disabled');
+                        }
                     }
                     if(data.etape == 1){
                         $('#etape_encours').html('Presentation');
                         $('#ChronoApplaud').addClass('disabled');
                         $('#active_speaker').addClass('disabled');
+                        if(!$('#speaking-start').hasClass('disabled')) {
+                            $("#speaking-start").addClass('disabled');
+                        }
+                        if(!$('#show-front').hasClass('disabled')) {
+                            $("#show-front").addClass('disabled');
+                        }
                     }
                     if(data.etape == 2){
                         $('#etape_encours').html('Speaker');
                         $('#ChronoApplaud').addClass('disabled');
                         $('#active_speaker').removeClass('disabled');
+                        if(data.intervention){
+                            if($('#speaking-start').hasClass('disabled')) {
+                                $("#speaking-start").removeClass('disabled');
+                            }
+                            if($('#show-front').hasClass('disabled')) {
+                                $("#show-front").removeClass('disabled');
+                            }
+                        }
                     }
                     if(data.etape == 3){
                         $('#etape_encours').html('Applaudissement');
                         $('#ChronoApplaud').removeClass('disabled');
                         $('#active_speaker').addClass('disabled');
+                        if(!$('#speaking-start').hasClass('disabled')) {
+                            $("#speaking-start").addClass('disabled');
+                        }
+                        if(!$('#show-front').hasClass('disabled')) {
+                            $("#show-front").addClass('disabled');
+                        }
                     }
                 }
             });

@@ -27,50 +27,173 @@
         </div>
     </div>
 </div>
-<hr/>
+
+<?php $speaker = $intervention->first(); ?>
+<hr style="margin-top: 10px;"/>
 <div class="row">
     <div class="col-lg-3">
         <div class="thumbnail">
-            <?= $this->Html->image('uploads/event_image.jpg', ['class' => 'img-circle img-responsive', 'id ' => 'img-photo', 'style' => 'width:177px;']); ?>
+            <?php
+            if($speaker):
+
+                echo $this->Html->image($speaker->speaker->avatar, ['class' => 'img-circle img-responsive', 'id ' => 'speaker-photo', 'style' => 'width:177px;']);
+
+            else:
+                ?>
+                <?= $this->Html->image('uploads/event_image.jpg', ['class' => 'img-circle img-responsive', 'id ' => 'speaker-photo', 'style' => 'width:177px;']); ?>
+            <?php
+            endif;
+            ?>
+
 <!--            <img data-src="holder.js/100%x180" alt="...">-->
         </div>
 
-        <h1 class="text-center" id="chrono">00:00</h1>
+        <h1 class="text-center" id="chrono"><span class="min">00</span>:<span class="sec">00</span>:<span class="cent">0</span>  </h1>
 
     </div>
+
     <div class="col-lg-9">
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="row">
-                    <div class="form-horizontal  center-block">
-                        <div class="form-group">
-                            <label class="col-lg-4 control-label lead">Nom :</label>
-                            <div class="col-lg-8">
-                                <p class="form-control-static lead">Ronald steve Ndi</p>
+                    <div class="col-lg-6">
+                        <div class="form-horizontal center-block">
+                            <div class="form-group">
+                                <label class="col-lg-4 control-label" style="text-align: left !important;">Nom :</label>
+                                <div class="col-lg-8">
+                                    <p class="form-control-static" id="speaker-nom">
+                                        <?php
+                                        if($speaker):
+
+                                                echo $speaker->speaker->nom;
+
+                                        else:
+                                        ?>
+                                            Nom du speaker
+                                        <?php
+                                        endif;
+                                        ?>
+                                    </p>
+                                </div>
+
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-lg-4 control-label lead">Fonction :</label>
-                            <div class="col-lg-8">
-                                <p class="form-control-static lead">Developpeur</p>
+                        <div class="form-horizontal center-block">
+                            <div class="form-group">
+                                <label class="col-lg-4 control-label" style="text-align: left !important;">Fonction :</label>
+                                <div class="col-lg-8">
+                                    <p class="form-control-static" id="speaker-fonction">
+                                        <?php
+                                        if($speaker):
+
+                                            echo $speaker->speaker->fonction;
+
+                                        else:
+                                            ?>
+                                            Fonction du speaker
+                                        <?php
+                                        endif;
+                                        ?>
+                                    </p>
+                                </div>
+
                             </div>
                         </div>
+                        <div class="form-horizontal center-block">
+                            <div class="form-group">
+                                <label class="col-lg-4 control-label" style="text-align: left !important;">Twitter :</label>
+                                <div class="col-lg-8">
+                                    <p class="form-control-static" id="speaker-twitter">
+                                        <?php
+                                        if($speaker):
+
+                                            echo $speaker->speaker->twitter;
+
+                                        else:
+                                            ?>
+
+                                            Compte twitter
+                                        <?php
+                                        endif;
+                                        ?>
+
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-horizontal center-block">
+                            <div class="form-group">
+                                <label class="col-lg-4 control-label" style="text-align: left !important;">Categorie :</label>
+                                <div class="col-lg-8">
+                                    <p class="form-control-static" id="speaker-categorie">
+                                        <?php
+                                        if($speaker):
+
+                                            echo $speaker->categorie;
+
+                                        else:
+                                            ?>
+
+                                            Categorie speaker
+                                        <?php
+                                        endif;
+                                        ?>
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                            <div class="center-block">
+                                <div class="form-group">
+                                    <label class="control-label">Sujet :</label>
+                                    <p class="form-control-static" id="speaker-sujet">
+                                        <?php
+                                        if($speaker):
+
+                                            echo $speaker->titre;
+
+                                        else:
+                                            ?>
+
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                        <?php
+                                        endif;
+                                        ?>
+
+                                    </p>
+
+                                </div>
+                            </div>
+
                     </div>
                 </div>
-                <hr/>
+                <hr style="margin-top: 0"/>
                 <div class="row">
-                    <div class="col-lg-6">
-                        <a class="btn btn-block btn-info disabled" href="#">Start chrono speaking</a>
+                    <div class="col-lg-4 text-center">
+                        <strong>Speaking</strong><br/>
+                        <button class="btn btn-success btn-sm disabled" id="speaking-start">Start</button>
+                        <button class="btn btn-danger btn-sm disabled" id="speaking-stop">Stop</button>
+                        <button class="btn btn-default btn-sm disabled" id="speaking-reset">Reset</button>
                     </div>
-                    <div class="col-lg-6">
-                        <a class="btn btn-block btn-info disabled" href="#">Start chrono question</a>
+                    <div class="col-lg-4 text-center">
+                        <strong>Question</strong><br/>
+                        <button class="btn btn-success btn-sm disabled" id="question-start">Start</button>
+                        <button class="btn btn-danger btn-sm disabled" id="question-stop">Stop</button>
+                    </div>
+                    <div class="col-lg-4"><br/>
+                        <button class="btn btn-block btn-primary btn-sm <?php if(!$speaker || $etape->etape != 2): ?>disabled <?php endif; ?>" id="show-front">Afficher</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<hr/>
+<hr style="margin-top: 0"/>
 <div class="row">
     <div class="col-lg-12 well text-center">
         <h1 id="moment">Afficher vos moments ici</h1>
@@ -83,6 +206,136 @@ $this->start('script2');
 <script>
     $(document).ready(function(){
 
+        var centi=9; // initialise les dixtièmes
+        var secon=59; //initialise les secondes
+        var minu=4 ;//initialise les minutes
+        var compte;
+
+        $('#speaking-start').on('click', function(){
+            compte = setInterval(function chrono(){
+                centi--; //incrémentation des dixièmes de 1
+                if (centi<0){centi=9;secon--} //si les dixièmes > 9,
+//            on les réinitialise à 0 et on incrémente les secondes de 1
+                if (secon<0){secon=59;minu--} //si les secondes > 59,
+//            on les réinitialise à 0 et on incrémente les minutes de 1
+                $(".min").html("0"+minu);
+                var space = "";
+                if(secon<10){ space = "0"}
+                $(".sec").html(space+""+secon);
+                $(".cent").html(centi);
+                if(centi == 0 && secon == 0 && minu == 0){
+                    $("#question-start").removeClass('disabled');
+                    $("#speaking-start").addClass('disabled');
+                    $("#speaking-stop").addClass('disabled');
+                    $("#speaking-reset").addClass('disabled');
+                    $("#chrono").addClass('bg-danger');
+                    var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                    socket.emit('view_moment', {
+                        moment: "Fin du speech de l'intervenant !"
+                    });
+                    clearInterval(compte);
+                }
+            },100);
+            $(this).addClass('disabled');
+            $("#speaking-stop").removeClass('disabled');
+        });
+
+        // Stopper le chrono pour le speaking
+        $('#speaking-stop').on('click', function(){
+
+            if(centi != 0 && secon != 0 && minu != 0){
+                var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                socket.emit('view_moment', {
+                    moment: "Chrono Dompte"
+                });
+            }
+
+
+            $("#speaking-start").removeClass('disabled');
+            $("#speaking-reset").removeClass('disabled');
+            $("#question-start").removeClass('disabled');
+            clearInterval(compte);
+        });
+
+        // Reset le chrono pour le speaking
+        $('#speaking-reset').on('click', function(){
+
+            $("#speaking-stop").addClass('disabled');
+            $("#question-start").addClass('disabled');
+            $(this).addClass('disabled');
+            centi=9; // initialise les dixtièmes
+            secon=59; //initialise les secondes
+            minu=4 ;//initialise les minutes
+
+            $(".min").html("00");
+            $(".sec").html("00");
+            $(".cent").html("0");
+        });
+
+        // Affichage du speaker sur le frontend de l'application
+        $('#show-front').on('click', function(){
+            $(this).addClass('disabled');
+            $('#speaking-start').removeClass('disabled');
+        });
+
+        var qcenti=9; // initialise les dixtièmes
+        var qsecon=59; //initialise les secondes
+        var qminu=4 ;//initialise les minutes
+
+        $('#question-start').on('click', function () {
+            qcenti += centi;
+            while(qcenti > 9){
+                qcenti -= 9;
+                qsecon += 1;
+            }
+
+            qsecon += secon;
+            while(qsecon > 59){
+                qsecon -= 59;
+                qminu += 1;
+            }
+
+            qminu += minu;
+
+            $("#speaking-start").addClass('disabled');
+            $("#speaking-reset").addClass('disabled');
+            $("#speaking-stop").addClass('disabled');
+            $("#chrono").removeClass('bg-danger');
+            $(this).addClass('disabled');
+
+            var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+            socket.emit('view_moment', {
+                moment: "Posez vos questions !"
+            });
+
+            qcompte = setInterval(function chrono(){
+
+                qcenti--; //incrémentation des dixièmes de 1
+                if (qcenti<0){qcenti=9;qsecon--} //si les dixièmes > 9,
+//            on les réinitialise à 0 et on incrémente les secondes de 1
+                if (qsecon<0){qsecon=59;qminu--} //si les secondes > 59,
+//            on les réinitialise à 0 et on incrémente les minutes de 1
+                $(".min").html("0"+qminu);
+                var space = "";
+                if(qsecon<10){ space = "0"}
+                $(".sec").html(space+""+qsecon);
+                $(".cent").html(qcenti);
+
+                if(qcenti == 0 && qsecon == 0 && qminu == 0){
+                    var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                    socket.emit('view_moment', {
+                        moment: "Fin de vos questions !"
+                    });
+                    clearInterval(qcompte);
+                }
+            },100);
+        });
+
+
         $('#submit').on('click', function(e){
             e.preventDefault();
             if($('#inputMoment').val() != ""){
@@ -92,7 +345,13 @@ $this->start('script2');
                 socket.emit('view_moment', {
                     moment: $value
                 });
+            }
+        });
 
+        $('#inputMoment').keypress(function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                return false;
             }
         });
 
@@ -100,6 +359,16 @@ $this->start('script2');
 
         socket.on( 'view_moment', function( data ) {
             $( "#moment" ).html( data.moment);
+        });
+
+        socket.on( 'active_speaker', function( data ) {
+            $( "#speaker-photo" ).attr('src', '\\img\\'+data.photo);
+            $( "#speaker-nom" ).html( data.nom);
+            $( "#speaker-fonction" ).html( data.fonction);
+            $( "#speaker-sujet" ).html( data.sujet);
+            $( "#speaker-categorie" ).html( data.categorie);
+            $( "#speaker-twitter" ).html( data.twitter);
+            $("#show-front").removeClass('disabled');
         });
 //        var socket = io.connect( 'http://'+window.location.hostname+':3000' );
 //

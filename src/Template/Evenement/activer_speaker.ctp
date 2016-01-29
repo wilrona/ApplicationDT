@@ -1,8 +1,9 @@
 <div class="modal-header bg-primary">
     <h4 class="modal-title">Activer un speaker : <?= $edition->titre ?></h4>
 </div>
-<div class="modal-body">
-
+<div class="modal-body" style="height: 450px; overflow-y: auto;">
+    <h3>Liste des intervenants</h3>
+    <hr/>
     <table class="table table-condensed table-stripped">
         <thead>
         <tr>
@@ -14,15 +15,15 @@
         </thead>
         <tbody>
         <?php
-
-        foreach($intervention as $inter):
-
+            foreach($intervention as $inter):
         ?>
-            <tr>
-                <td><?= $inter->speaker_id; ?></td>
+            <tr <?php if($inter->actif): ?> class="active" <?php endif; ?>>
+                <td><?= $inter->speaker->nom; ?></td>
                 <td><?= $inter->titre; ?></td>
-                <td></td>
-                <td></td>
+                <td><?= $inter->categorie ?></td>
+                <td>
+                    <a href="/evenement/activer_speaker/<?= $edition->id; ?>/<?= $inter->id; ?>.json" class="btn btn-link btn-xs activation" ><?php if($inter->actif): ?>Desactiver <?php else: ?> Activer <?php endif; ?></a>
+                </td>
             </tr>
         <?php
             endforeach;
@@ -32,6 +33,43 @@
 
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
-    <button type="button" class="btn btn-primary" id="validation">Valider</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal" id="closed">Fermer</button>
 </div>
+
+<script>
+       $('.activation').on('click', function(e){
+           e.preventDefault();
+           var url = $(this).attr('href');
+           $.ajax({
+               url: url,
+               type: 'GET',
+               success: function(data) {
+                    if(data.speaker['actif'] == 1){
+                        var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                        socket.emit('active_speaker', {
+                            nom: data.speaker['nom'],
+                            fonction: data.speaker['fonction'],
+                            sujet: data.speaker['sujet'],
+                            photo: data.speaker['photo'],
+                            twitter: data.speaker['twitter'],
+                            categorie: data.speaker['categorie'],
+                            intervent: data.speaker['intervent']
+                        });
+
+                    }else{
+                        if(!$('#speaking-start').hasClass('disabled')) {
+                            $("#speaking-start").addClass('disabled');
+                        }
+                        if(!$('#show-front').hasClass('disabled')) {
+                            $("#show-front").addClass('disabled');
+                        }
+                    }
+
+                   $('#closed').trigger('click');
+               }
+
+           });
+       });
+
+</script>

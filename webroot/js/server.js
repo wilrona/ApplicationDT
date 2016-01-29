@@ -19,9 +19,42 @@ io.on('connection', function (socket) {
     });
   });
 
+    socket.on( 'current_speaker', function( data ) {
+        io.sockets.emit( 'current_speaker', {
+            speaker: data.speaker
+
+        });
+    });
+
     socket.on( 'change_etape', function( data ) {
         io.sockets.emit( 'change_etape', {
             etape: data.etape
+
+        });
+    });
+
+    socket.on( 'active_speaker', function( data ) {
+        io.sockets.emit( 'active_speaker', {
+            nom: data.nom,
+            fonction: data.fonction,
+            sujet: data.sujet,
+            photo: data.photo,
+            twitter: data.twitter,
+            categorie: data.categorie,
+            intervent: data.intervent
+
+        });
+    });
+
+    socket.on( 'affiche_speaker', function( data ) {
+        io.sockets.emit( 'affiche_speaker', {
+            nom: data.nom,
+            fonction: data.fonction,
+            sujet: data.sujet,
+            photo: data.photo,
+            twitter: data.twitter,
+            categorie: data.categorie,
+            intervent: data.intervent
 
         });
     });

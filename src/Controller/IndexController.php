@@ -28,10 +28,15 @@ class IndexController extends AppController
         $etape = TableRegistry::get('Moment');
         $etape = $etape->find()->first();
 
+        $intervention = TableRegistry::get('Intervention');
+        $intervention = $intervention->find('all', array('conditions' => array(
+                'Intervention.actif' => true
+            )))->contain(['Edition', 'Speaker']);
+
 
 
 //        $this->set('index', $this->paginate($this->Index));
-        $this->set(compact('edition_encours', 'etape'));
+        $this->set(compact('edition_encours', 'etape', 'intervention'));
     }
 
 

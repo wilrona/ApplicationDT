@@ -29,20 +29,67 @@ class EvenementController extends AppController
             }
         }
 
-        $this->set('etape', $etape);
-        $this->set('_serialize', ['etape']);
+        $intervention = TableRegistry::get('Intervention');
+        $intervention = $intervention->find()->where(['Intervention.actif' => true])->first();
+
+        $this->set(compact('etape', 'intervention'));
+        $this->set('_serialize', ['etape', 'intervention']);
     }
 
-    public function activerSpeaker($event_id)
+    public function activerSpeaker($event_id, $inter_id = null)
     {
         $editions = TableRegistry::get('Edition');
         $edition = $editions->get($event_id);
 
         $interventions = TableRegistry::get('Intervention');
-        $intervention = $interventions->find('all')->where(['edition_id' => $edition->id]);
+        $intervention = $interventions->find('all')
+                                        ->contain(['Edition', 'Speaker'])
+                                        ->where(['edition_id' => $edition->id]);
 
-        $this->set(compact('edition', 'intervention'));
-        $this->set('_serialize', ['edition', 'intervention']);
+        if($inter_id){
+            $inter_id = (int)$inter_id;
+
+            $interventionss = TableRegistry::get('Intervention');
+
+            $intervent_actif = $interventionss->find()->where(['actif' => true])->first();
+
+            $intervent = $interventionss->find()->where(['id' => $inter_id])->first();
+
+            if($intervent->actif){
+                $this->request->data['actif'] = 0;
+            }else{
+                if($intervent_actif){
+                    $intervent_actif->actif = 0;
+                    $interventionss->save($intervent_actif);
+                }
+                $this->request->data['actif'] = 1;
+            }
+
+            $intervents = $interventionss->patchEntity($intervent, $this->request->data);
+            if($interventionss->save($intervents)){
+
+                $intervent = $interventionss->find()->where(['id' => $inter_id])->first();
+                $speaker['actif'] = 0;
+                if($intervent->actif){
+                    $speakers = TableRegistry::get('Speaker');
+                    $speak = $speakers->get($intervent->speaker_id);
+
+                    $speaker['nom'] = $speak->nom;
+                    $speaker['fonction'] = $speak->fonction;
+                    $speaker['sujet'] = $intervent->titre;
+                    $speaker['photo'] = $speak->avatar;
+                    $speaker['twitter'] = $speak->twitter;
+                    $speaker['categorie'] = $intervent->categorie;
+                    $speaker['intervent'] = $intervent->id;
+                    $speaker['actif'] = 1;
+                }
+
+            }
+
+        }
+
+        $this->set(compact('edition', 'intervention', 'speaker'));
+        $this->set('_serialize', ['edition', 'intervention', 'speaker']);
     }
 
 
