@@ -33,6 +33,13 @@ io.on('connection', function (socket) {
         });
     });
 
+    socket.on( 'speaker_ready', function( data ) {
+        io.sockets.emit( 'speaker_ready', {
+            speaking: data.speaking
+
+        });
+    });
+
     socket.on( 'active_speaker', function( data ) {
         io.sockets.emit( 'active_speaker', {
             nom: data.nom,
@@ -53,17 +60,26 @@ io.on('connection', function (socket) {
             sujet: data.sujet,
             photo: data.photo,
             twitter: data.twitter,
-            categorie: data.categorie,
-            intervent: data.intervent
+            categorie: data.categorie
 
         });
     });
 
-  //socket.on( 'update_count_message', function( data ) {
-  //  io.sockets.emit( 'update_count_message', {
-  //  	update_count_message: data.update_count_message
-  //  });
-  //});
+  socket.on( 'start_chrono', function( data ) {
+    io.sockets.emit( 'start_chrono', {
+    	start_chrono: data.start_chrono
+    });
+  });
+
+    socket.on( 'synchro_chrono', function( data ) {
+        io.sockets.emit( 'synchro_chrono', {
+            cent: data.cent,
+            secon: data.secon,
+            minut: data.minut,
+            starts: data.starts
+        });
+    });
+
   //
   //socket.on( 'new_message', function( data ) {
   //  io.sockets.emit( 'new_message', {

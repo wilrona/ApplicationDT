@@ -64,13 +64,25 @@
                         $('#etape_encours').html('Speaker');
                         $('#ChronoApplaud').addClass('disabled');
                         $('#active_speaker').removeClass('disabled');
+
+                        var sockets = io.connect( 'http://'+window.location.hostname+':3000' );
                         if(data.intervention){
-                            if($('#speaking-start').hasClass('disabled')) {
-                                $("#speaking-start").removeClass('disabled');
-                            }
+//                            if($('#speaking-start').hasClass('disabled')) {
+//                                $("#speaking-start").removeClass('disabled');
+//                            }
                             if($('#show-front').hasClass('disabled')) {
                                 $("#show-front").removeClass('disabled');
                             }
+                            sockets.emit('speaker_ready', {
+                                speaking: 1
+                            });
+
+                        }else{
+
+                            sockets.emit('speaker_ready', {
+                                speaking: 1
+                            });
+
                         }
                     }
                     if(data.etape == 3){
@@ -84,6 +96,15 @@
                             $("#show-front").addClass('disabled');
                         }
                     }
+
+                    if (data.etape != 2){
+                        var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                        socket.emit('change_etape', {
+                            etape: data.etape
+                        });
+                    }
+
                 }
             });
         })

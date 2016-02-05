@@ -186,7 +186,7 @@
                         <button class="btn btn-danger btn-sm disabled" id="question-stop">Stop</button>
                     </div>
                     <div class="col-lg-4"><br/>
-                        <button class="btn btn-block btn-primary btn-sm <?php if(!$speaker || $etape->etape != 2): ?>disabled <?php endif; ?>" id="show-front">Afficher</button>
+                        <button class="btn btn-block btn-primary btn-sm <?php if(!$speaker || $etape->etape != 2): ?>disabled <?php endif; ?>" id="show-front" data-use="<?php if($etape->etape == 2): echo 1;  else:  echo 0; endif; ?>">Afficher</button>
                     </div>
                 </div>
             </div>
@@ -205,6 +205,8 @@ $this->start('script2');
 ?>
 <script>
     $(document).ready(function(){
+
+//        $('#show-front').data('use', 0);
 
         var centi=9; // initialise les dixtièmes
         var secon=59; //initialise les secondes
@@ -229,29 +231,37 @@ $this->start('script2');
                     $("#speaking-stop").addClass('disabled');
                     $("#speaking-reset").addClass('disabled');
                     $("#chrono").addClass('bg-danger');
-                    var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+                    socket = io.connect( 'http://'+window.location.hostname+':3000' );
 
                     socket.emit('view_moment', {
-                        moment: "Fin du speech de l'intervenant !"
+                        moment: "Fin du speech de l'intervenant"
                     });
                     clearInterval(compte);
                 }
             },100);
             $(this).addClass('disabled');
             $("#speaking-stop").removeClass('disabled');
+            $("#speaking-reset").removeClass('disabled');
+            $("#question-start").addClass('disabled');
+
+            var sockets = io.connect( 'http://'+window.location.hostname+':3000' );
+            sockets.emit('start_chrono', {
+                start_chrono: 1
+            });
         });
 
         // Stopper le chrono pour le speaking
         $('#speaking-stop').on('click', function(){
-
+            socket = io.connect( 'http://'+window.location.hostname+':3000' );
             if(centi != 0 && secon != 0 && minu != 0){
-                var socket = io.connect( 'http://'+window.location.hostname+':3000' );
-
                 socket.emit('view_moment', {
-                    moment: "Chrono Dompte"
+                    moment: "Chrono Dompté"
                 });
             }
 
+            socket.emit('start_chrono', {
+                start_chrono: 0
+            });
 
             $("#speaking-start").removeClass('disabled');
             $("#speaking-reset").removeClass('disabled');
@@ -262,9 +272,10 @@ $this->start('script2');
         // Reset le chrono pour le speaking
         $('#speaking-reset').on('click', function(){
 
-            $("#speaking-stop").addClass('disabled');
+//            $("#speaking-stop").addClass('disabled');
             $("#question-start").addClass('disabled');
-            $(this).addClass('disabled');
+
+//            $(this).addClass('disabled');
             centi=9; // initialise les dixtièmes
             secon=59; //initialise les secondes
             minu=4 ;//initialise les minutes
@@ -272,12 +283,11 @@ $this->start('script2');
             $(".min").html("00");
             $(".sec").html("00");
             $(".cent").html("0");
-        });
 
-        // Affichage du speaker sur le frontend de l'application
-        $('#show-front').on('click', function(){
-            $(this).addClass('disabled');
-            $('#speaking-start').removeClass('disabled');
+            socket = io.connect( 'http://'+window.location.hostname+':3000' );
+            socket.emit('start_chrono', {
+                start_chrono: 2
+            });
         });
 
         var qcenti=9; // initialise les dixtièmes
@@ -305,7 +315,7 @@ $this->start('script2');
             $("#chrono").removeClass('bg-danger');
             $(this).addClass('disabled');
 
-            var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+            socket = io.connect( 'http://'+window.location.hostname+':3000' );
 
             socket.emit('view_moment', {
                 moment: "Posez vos questions !"
@@ -325,7 +335,7 @@ $this->start('script2');
                 $(".cent").html(qcenti);
 
                 if(qcenti == 0 && qsecon == 0 && qminu == 0){
-                    var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+                    socket = io.connect( 'http://'+window.location.hostname+':3000' );
 
                     socket.emit('view_moment', {
                         moment: "Fin de vos questions !"
@@ -340,7 +350,7 @@ $this->start('script2');
             e.preventDefault();
             if($('#inputMoment').val() != ""){
                 var $value = $('#inputMoment').val();
-                var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+                socket = io.connect( 'http://'+window.location.hostname+':3000' );
 
                 socket.emit('view_moment', {
                     moment: $value
@@ -361,6 +371,10 @@ $this->start('script2');
             $( "#moment" ).html( data.moment);
         });
 
+        socket.on( 'speaker_ready', function( data ) {
+            $('#show-front').data('use', data.speaking);
+        });
+
         socket.on( 'active_speaker', function( data ) {
             $( "#speaker-photo" ).attr('src', '\\img\\'+data.photo);
             $( "#speaker-nom" ).html( data.nom);
@@ -370,19 +384,6 @@ $this->start('script2');
             $( "#speaker-twitter" ).html( data.twitter);
             $("#show-front").removeClass('disabled');
         });
-//        var socket = io.connect( 'http://'+window.location.hostname+':3000' );
-//
-//        socket.emit('new_count_message', {
-//            new_count_message: data.new_count_message
-//        });
-//
-//        socket.emit('new_message', {
-//            name: data.name,
-//            email: data.email,
-//            subject: data.subject,
-//            created_at: data.created_at,
-//            id: data.id
-//        });
 
         $(".nav li").on("click", function(e) {
             if ($(this).hasClass("disabled")) {
@@ -390,7 +391,51 @@ $this->start('script2');
                 return false;
             }
         });
+
+        // Affichage du speaker sur le frontend de l'application
+        $('#show-front').on('click', function(){
+            if($(this).data('use') == 1){
+                $(this).addClass('disabled');
+                $('#speaking-start').removeClass('disabled');
+
+                socket.emit('affiche_speaker', {
+                    nom: $( "#speaker-nom").html(),
+                    fonction: $( "#speaker-fonction").html(),
+                    sujet: $( "#speaker-sujet").html(),
+                    photo:  $( "#speaker-photo" ).attr('src'),
+                    twitter: $( "#speaker-twitter").html(),
+                    categorie: $( "#speaker-categorie").html()
+                });
+
+                socket.emit('change_etape', {
+                    etape: 2
+                });
+
+                socket.emit('view_moment', {
+                    moment: $( "#speaker-sujet").html()
+                });
+            }
+        });
     });
+
+    <?php
+        if($speaker && $etape->etape == 2):
+    ?>
+        if($('#show-front').data('use') == 1){
+            var socketss = io.connect( 'http://'+window.location.hostname+':3000' );
+            socketss.on( 'synchro_chrono', function( data ) {
+                if(data.starts == 1){
+                    centi=data.cent; // initialise les dixtièmes
+                    secon=data.secon; //initialise les secondes
+                    minu=data.minut ;//initialise les minutes
+                    $('#show-front').addClass('hidden');
+                    $('#speaking-start').removeClass('hidden').trigger('click');
+                }
+            });
+        }
+    <?php
+        endif;
+    ?>
 </script>
 <?php
 $this->end();

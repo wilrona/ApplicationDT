@@ -12,11 +12,29 @@ use Cake\ORM\TableRegistry;
 class EvenementController extends AppController
 {
 
-    /**
-     * change_etape method
-     *
-     * @return void
-     */
+    public function index($etape = null)
+    {
+        $this->viewBuilder()->layout('frontend');
+
+        $etapes = TableRegistry::get('Moment');
+        $etape = $etapes->find()->first();
+
+        $edition_encours = TableRegistry::get('Edition');
+        $edition_encours = $edition_encours->find()
+            ->orderDesc('date')->first();
+
+        $intervention = TableRegistry::get('Intervention');
+        $intervention = $intervention->find('all', array('conditions' => array(
+                'Intervention.actif' => true
+            )))->contain(['Edition', 'Speaker'])->first();
+
+        $this->set(compact('etape', 'edition_encours', 'intervention'));
+        $this->set('_serialize', ['etape', 'edition_encours', 'intervention']);
+
+    }
+
+
+
     public function changeEtape()
     {
         $etapes = TableRegistry::get('Moment');
@@ -91,6 +109,12 @@ class EvenementController extends AppController
         $this->set(compact('edition', 'intervention', 'speaker'));
         $this->set('_serialize', ['edition', 'intervention', 'speaker']);
     }
+
+
+//    public function load($ratio){
+//        $this->set(compact('ratio'));
+//        $this->set('_serialize', ['ratio']);
+//    }
 
 
 }
