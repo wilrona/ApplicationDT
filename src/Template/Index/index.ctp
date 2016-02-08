@@ -186,7 +186,7 @@
                         <button class="btn btn-danger btn-sm disabled" id="question-stop">Stop</button>
                     </div>
                     <div class="col-lg-4"><br/>
-                        <button class="btn btn-block btn-primary btn-sm <?php if(!$speaker || $etape->etape != 2): ?>disabled <?php endif; ?>" id="show-front" data-use="<?php if($etape->etape == 2): echo 1;  else:  echo 0; endif; ?>">Afficher</button>
+                        <button class="btn btn-block btn-primary btn-sm <?php if($speaker && $speaker->afficher == 1): ?> disabled <?php endif; ?><?php if(!$speaker || $etape->etape != 2): ?>disabled <?php endif; ?>" id="show-front" data-use="<?php if($etape->etape == 2): echo 1;  else:  echo 0; endif; ?>">Afficher</button>
                     </div>
                 </div>
             </div>
@@ -393,31 +393,49 @@ $this->start('script2');
         });
 
         // Affichage du speaker sur le frontend de l'application
-        $('#show-front').on('click', function(){
-            if($(this).data('use') == 1){
-                $(this).addClass('disabled');
-                $('#speaking-start').removeClass('disabled');
+        $('#show-front').on('click', function(e){
+                e.preventDefault();
+                var url = "/evenement/affiche.json";
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(data) {
+                        if($('#show-front').data('use') == 1){
+                            $('#show-front').addClass('disabled');
+                            $('#speaking-start').removeClass('disabled');
 
-                socket.emit('affiche_speaker', {
-                    nom: $( "#speaker-nom").html(),
-                    fonction: $( "#speaker-fonction").html(),
-                    sujet: $( "#speaker-sujet").html(),
-                    photo:  $( "#speaker-photo" ).attr('src'),
-                    twitter: $( "#speaker-twitter").html(),
-                    categorie: $( "#speaker-categorie").html()
+                            socket.emit('affiche_speaker', {
+                                nom: $( "#speaker-nom").html(),
+                                fonction: $( "#speaker-fonction").html(),
+                                sujet: $( "#speaker-sujet").html(),
+                                photo:  $( "#speaker-photo" ).attr('src'),
+                                twitter: $( "#speaker-twitter").html(),
+                                categorie: $( "#speaker-categorie").html()
+                            });
+
+                            socket.emit('change_etape', {
+                                etape: 2
+                            });
+
+                            socket.emit('view_moment', {
+                                moment: $( "#speaker-sujet").html()
+                            });
+                        }
+                    }
                 });
 
-                socket.emit('change_etape', {
-                    etape: 2
-                });
-
-                socket.emit('view_moment', {
-                    moment: $( "#speaker-sujet").html()
-                });
-            }
         });
     });
 
+    <?php
+        if($speaker && $speaker->afficher == 1):
+    ?>
+        if($('#show-front').data('use') == 1){
+            $("#speaking-start").removeClass('disabled');
+        }
+    <?php
+        endif;
+    ?>
     <?php
         if($speaker && $etape->etape == 2):
     ?>

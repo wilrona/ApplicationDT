@@ -75,9 +75,11 @@ class EvenementController extends AppController
 
             if($intervent->actif){
                 $this->request->data['actif'] = 0;
+                $this->request->data['afficher'] = 0;
             }else{
                 if($intervent_actif){
                     $intervent_actif->actif = 0;
+                    $intervent_actif->afficher = 0;
                     $interventionss->save($intervent_actif);
                 }
                 $this->request->data['actif'] = 1;
@@ -111,10 +113,13 @@ class EvenementController extends AppController
     }
 
 
-//    public function load($ratio){
-//        $this->set(compact('ratio'));
-//        $this->set('_serialize', ['ratio']);
-//    }
+    public function affiche(){
+        $interventionss = TableRegistry::get('Intervention');
+
+        $intervent_actif = $interventionss->find()->where(['actif' => true])->first();
+        $intervent_actif->afficher = 1;
+        $interventionss->save($intervent_actif);
+    }
 
 
 }

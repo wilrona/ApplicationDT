@@ -290,16 +290,16 @@ body {
   }
 }
 
-span.image-speaker canvas{
-    /*background: #000;*/
-}
-
-img.image-speaker{
+img#speaker-photo{
     position: absolute;
     margin-top: 22px;
-    margin-left: 22px;
+    margin-left: -89px;
 }
-
+/*img#speaker-photo{*/
+    /*position: absolute;*/
+    /*margin-top: 12px;*/
+    /*margin-left: 11px;*/
+/*}*/
 #presentation{
     position: absolute;
     top: 0;
@@ -323,4 +323,15 @@ img.image-speaker{
 
 @keyframes blinker {
     50% { opacity: 0.3; }
+}
+
+.ville-planet{
+    margin-left: 12px;
+}
+
+.planet{
+    width: 20px;
+    position: absolute;
+    left: 70px;
+    top: 6px
 }

@@ -59,6 +59,12 @@
                         if(!$('#show-front').hasClass('disabled')) {
                             $("#show-front").addClass('disabled');
                         }
+
+                        var socketss = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                        socketss.emit('view_moment', {
+                            moment: "Bienvenu aux Digital Thursday"
+                        });
                     }
                     if(data.etape == 2){
                         $('#etape_encours').html('Speaker');
@@ -66,6 +72,7 @@
                         $('#active_speaker').removeClass('disabled');
 
                         var sockets = io.connect( 'http://'+window.location.hostname+':3000' );
+
                         if(data.intervention){
 //                            if($('#speaking-start').hasClass('disabled')) {
 //                                $("#speaking-start").removeClass('disabled');
