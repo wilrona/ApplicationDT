@@ -46,6 +46,8 @@ $(document).ready(function(){
 
             $('#speaker').addClass('hidden');
             $('#presentation').removeClass('hidden');
+            $('#speaking-ico').addClass('hidden');
+            $('#question-ico').addClass('hidden');
         }
 
         if(data.etape == 1){
@@ -54,6 +56,8 @@ $(document).ready(function(){
 
             $('#speaker').addClass('hidden');
             $('#presentation').removeClass('hidden');
+            $('#speaking-ico').addClass('hidden');
+            $('#question-ico').addClass('hidden');
             clearInterval(the_moment);
         }
 
@@ -61,8 +65,9 @@ $(document).ready(function(){
             $('#presentation').addClass('hidden');
             $('#speaker').removeClass('hidden');
             $('.moment').removeClass('hidden').data('etape', 2);
+            $('#speaking-ico').addClass('hidden');
+            $('#question-ico').addClass('hidden');
         }
-        console.log($('.moment').data('etape'));
     });
 
     socket.on( 'affiche_speaker', function( data ) {
@@ -71,7 +76,23 @@ $(document).ready(function(){
         $( "#speaker-sujet").html(data.sujet);
         $( "#speaker-photo" ).attr('src', data.photo);
         $( "#speaker-twitter").html(data.twitter);
-        $( "#speaker-categorie").html(data.categorie);
+
+        $("#horloge").removeClass('text-danger');
+        $('#speaking-ico').addClass('hidden');
+        $('#question-ico').addClass('hidden');
+        $('.canvas').circleProgress('value',0);
+
+        var my_categorie;
+        if(data.categorie == 'speaker'){
+            my_categorie = 1;
+        }else if(data.categorie == 'startup'){
+            my_categorie = 2;
+        }else if(data.categorie == 'partenaire'){
+            my_categorie = 3;
+        }else if(data.categorie == 'partenaire gold'){
+            my_categorie = 4;
+        }
+        $( "#speaker-categorie").html(data.categorie).data('categorie', my_categorie);
         if($('#TextMoment').prev().html() == ""){
             $('#TextMoment').prev().remove();
         }
@@ -171,6 +192,162 @@ $(document).ready(function(){
 
     });
 
+
+    var speaker_chrono;
+    var centi; // initialise les dixtièmes
+    var secon; //initialise les secondes
+    var minu ;//initialise les minutes
+
+    var max = 298;
+    var min = 0;
+    var compte;
+
+    var qcenti; // initialise les dixtièmes
+    var qsecon; //initialise les secondes
+    var qminu ;//initialise les minutes
+
+    var reste_max;
+    var qmax;
+    var ratio;
+    var comptes;
+
+    socket.on( 'start_chrono', function( data ) {
+
+        if(data.start_chrono == 0){
+            $("#horloge").addClass('text-danger');
+            clearInterval(speaker_chrono);
+            $('#speaking-ico').removeClass('blink_me');
+        }
+
+        if(data.start_chrono == 1){
+            compte = 0;
+            centi=9; // initialise les dixtièmes
+            secon=59; //initialise les secondes
+            minu=4 ;//initialise les minutes
+            $('#speaking-ico').removeClass('hidden');
+            var $categori = $('#speaker-categorie').data('categorie');
+            if($categori == 3){
+                minu = 0;
+                max = 58;
+            }
+            if($categori == 4){
+                minu = 1;
+                max = 116;
+            }
+
+            if($categori < 3){
+                max = 298;
+            }
+
+            $("#horloge").removeClass('text-danger');
+
+            speaker_chrono = setInterval(function chrono(){
+                centi--; //incrémentation des dixièmes de 1
+                if (centi<0){
+                    centi=9;
+                    secon--;
+                    comptes = compte++;
+                    ratio = comptes / max;
+                    $('.canvas').circleProgress('value',ratio);
+                } //si les dixièmes > 9,
+//            on les réinitialise à 0 et on incrémente les secondes de 1
+                if (secon<0){secon=59;minu--} //si les secondes > 59,
+//            on les réinitialise à 0 et on incrémente les minutes de 1
+                var space = "";
+                if(secon<10){ space = "0"}
+                $('#horloge').html("0"+minu+"&#58;"+space+""+secon+"&#58;"+centi);
+                if(centi == 0 && secon == 0 && minu == 0){
+                    $("#horloge").addClass('text-danger');
+                    $('#speaking-ico').removeClass('blink_me');
+                    clearInterval(speaker_chrono);
+                }
+            },100);
+        }
+
+        if(data.start_chrono == 2){
+            centi=9; // initialise les dixtièmes
+            secon=59; //initialise les secondes
+            minu=4 ;//initialise les minutes
+            $categori = $('#speaker-categorie').data('categorie');
+            if($categori == 3){
+                minu = 0;
+                max = 58;
+            }
+            if($categori == 4){
+                minu = 1;
+                max = 116;
+            }
+            if($categori < 3){
+                max = 298;
+            }
+            $('.canvas').circleProgress('value',0);
+            compte = 0;
+            $('#horloge').html("00&#58;00&#58;0").removeClass('text-danger');
+        }
+
+
+        if(data.start_chrono == 3){
+
+            $('#speaking-ico').addClass('hidden');
+            $('#question-ico').removeClass('hidden');
+
+            reste_max = max - compte;
+            qmax = max + reste_max;
+            qmax -= 4;
+
+            compte = 1;
+            ratio = 0;
+            $("#horloge").removeClass('text-danger');
+            $('.canvas').circleProgress('value',ratio);
+
+            qcenti=9; // initialise les dixtièmes
+            qsecon=59; //initialise les secondes
+            qminu=4 ;//initialise les minutes
+
+            qcenti += centi;
+            while(qcenti > 9){
+                qcenti -= 9;
+                qsecon += 1;
+            }
+
+            qsecon += secon;
+            while(qsecon > 59){
+                qsecon -= 59;
+                qminu += 1;
+            }
+
+            qminu += minu;
+
+            speaker_chrono = setInterval(function chrono(){
+
+                qcenti--; //incrémentation des dixièmes de 1
+                if (qcenti<0){
+                    qcenti=9;
+                    qsecon--;
+                    comptes = compte++;
+                    ratio = comptes / qmax;
+                    $('.canvas').circleProgress('value',ratio);
+                } //si les dixièmes > 9,
+//            on les réinitialise à 0 et on incrémente les secondes de 1
+                if (qsecon<0){
+                    qsecon=59;
+                    qminu--;
+                } //si les secondes > 59,
+//            on les réinitialise à 0 et on incrémente les minutes de 1
+
+                var space = "";
+                if(qsecon<10){ space = "0"}
+                $('#horloge').html("0"+qminu+"&#58;"+space+""+qsecon+"&#58;"+qcenti);
+
+                if(qcenti == 0 && qsecon == 0 && qminu == 0){
+                    $("#horloge").addClass('text-danger');
+                    $('#question-ico').removeClass('blink_me');
+                    clearInterval(speaker_chrono);
+                }
+            },100);
+        }
+
+    });
 
 
 

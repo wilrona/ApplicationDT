@@ -57,6 +57,11 @@
                             intervent: data.speaker['intervent']
                         });
 
+                        $('#chrono').removeClass('bg-danger');
+                        $('#speaker-start').addClass('hidden');
+                        $('#speaker-stop').addClass('hidden');
+                        $('#speaker-reset').addClass('hidden');
+
                     }else{
                         if(!$('#speaking-start').hasClass('disabled')) {
                             $("#speaking-start").addClass('disabled');
@@ -66,7 +71,7 @@
                         }
                     }
 
-                   $('#closed').trigger('click');
+                    $('#closed').trigger('click');
                }
 
            });

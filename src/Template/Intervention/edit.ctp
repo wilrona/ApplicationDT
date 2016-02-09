@@ -15,7 +15,7 @@
     echo $this->Form->input('categorie',
         ['label' => 'Categorie :',
             'type' => 'select',
-            'options' => array('speaker' => 'Speaker', 'startup' => 'Startup', 'partenaire' => 'Partenaire'),
+            'options' => array('speaker' => 'Speaker', 'startup' => 'Startup', 'partenaire' => 'Partenaire', 'partenaire gold' => 'Partenaire Gold'),
             'empty' => 'Selectionne une categorie',
             'class' => 'g-select input-lg'
         ]

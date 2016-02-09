@@ -128,7 +128,14 @@
                             <div class="form-group">
                                 <label class="col-lg-4 control-label" style="text-align: left !important;">Categorie :</label>
                                 <div class="col-lg-8">
-                                    <p class="form-control-static" id="speaker-categorie">
+                                    <p class="form-control-static" id="speaker-categorie" data-categorie="
+                                    <?php
+                                        if($speaker && $speaker->categorie == "speaker"): echo 1;
+                                        elseif($speaker && $speaker->categorie == "startup"): echo 2;
+                                        elseif($speaker && $speaker->categorie == 'partenaire'): echo 3;
+                                        elseif($speaker && $speaker->categorie == 'partenaire gold'): echo 4;
+                                        endif;
+                                    ?>">
                                         <?php
                                         if($speaker):
 
@@ -208,12 +215,24 @@ $this->start('script2');
 
 //        $('#show-front').data('use', 0);
 
-        var centi=9; // initialise les dixtièmes
-        var secon=59; //initialise les secondes
-        var minu=4 ;//initialise les minutes
+        var centi; // initialise les dixtièmes
+        var secon; //initialise les secondes
+        var minu ;//initialise les minutes
         var compte;
 
         $('#speaking-start').on('click', function(){
+
+            centi=9; // initialise les dixtièmes
+            secon=59; //initialise les secondes
+            minu=4 ;//initialise les minutes
+
+            var $categori = $('#speaker-categorie').data('categorie');
+            if($categori == 3){
+                minu = 0;
+            }
+            if($categori == 4){
+                minu = 1;
+            }
             compte = setInterval(function chrono(){
                 centi--; //incrémentation des dixièmes de 1
                 if (centi<0){centi=9;secon--} //si les dixièmes > 9,
@@ -226,7 +245,10 @@ $this->start('script2');
                 $(".sec").html(space+""+secon);
                 $(".cent").html(centi);
                 if(centi == 0 && secon == 0 && minu == 0){
-                    $("#question-start").removeClass('disabled');
+                    if($categori != 3 && $categori != 4){
+                        $("#question-start").removeClass('disabled');
+                    }
+
                     $("#speaking-start").addClass('disabled');
                     $("#speaking-stop").addClass('disabled');
                     $("#speaking-reset").addClass('disabled');
@@ -265,7 +287,9 @@ $this->start('script2');
 
             $("#speaking-start").removeClass('disabled');
             $("#speaking-reset").removeClass('disabled');
-            $("#question-start").removeClass('disabled');
+            if($('#speaker-categorie').data('categorie') != 3 || $('#speaker-categorie').data('categorie') != 4){
+                $("#question-start").removeClass('disabled');
+            }
             clearInterval(compte);
         });
 
@@ -280,6 +304,13 @@ $this->start('script2');
             secon=59; //initialise les secondes
             minu=4 ;//initialise les minutes
 
+            if($('#speaker-categorie').data('categorie') == 3){
+                minu = 0;
+            }
+            if($('#speaker-categorie').data('categorie') == 4){
+                minu = 1;
+            }
+
             $(".min").html("00");
             $(".sec").html("00");
             $(".cent").html("0");
@@ -290,11 +321,21 @@ $this->start('script2');
             });
         });
 
-        var qcenti=9; // initialise les dixtièmes
-        var qsecon=59; //initialise les secondes
-        var qminu=4 ;//initialise les minutes
+        var qcenti; // initialise les dixtièmes
+        var qsecon; //initialise les secondes
+        var qminu ;//initialise les minutes
 
         $('#question-start').on('click', function () {
+
+            socket = io.connect( 'http://'+window.location.hostname+':3000' );
+            socket.emit('start_chrono', {
+                start_chrono: 3
+            });
+
+            qcenti=9; // initialise les dixtièmes
+            qsecon=59; //initialise les secondes
+            qminu=4 ;//initialise les minutes
+
             qcenti += centi;
             while(qcenti > 9){
                 qcenti -= 9;
@@ -380,8 +421,20 @@ $this->start('script2');
             $( "#speaker-nom" ).html( data.nom);
             $( "#speaker-fonction" ).html( data.fonction);
             $( "#speaker-sujet" ).html( data.sujet);
-            $( "#speaker-categorie" ).html( data.categorie);
-            $( "#speaker-twitter" ).html( data.twitter);
+
+            var my_categorie;
+            if(data.categorie == 'speaker'){
+                my_categorie = 1;
+            }else if(data.categorie == 'startup'){
+                my_categorie = 2;
+            }else if(data.categorie == 'partenaire'){
+                my_categorie = 3;
+            }else if(data.categorie == 'partenaire gold'){
+                my_categorie = 4;
+            }
+
+            $("#speaker-categorie" ).html(data.categorie).data('categorie', my_categorie);
+            $("#speaker-twitter" ).html(data.twitter);
             $("#show-front").removeClass('disabled');
         });
 

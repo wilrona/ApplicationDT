@@ -335,3 +335,33 @@ img#speaker-photo{
     left: 70px;
     top: 6px
 }
+
+.note-margin{
+    margin-top: 250px;
+}
+
+.note-chrono{
+    position: absolute;
+    right: 400px;
+    top: 0;
+}
+
+.note-chrono img{
+    right: 21px;
+}
+
+.note-view{
+    position: absolute;
+    left: 400px;
+    top: 0;
+}
+
+.note-view .text{
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    line-height: 220px;
+    font-size: 40px;
+}
