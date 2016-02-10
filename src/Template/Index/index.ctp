@@ -463,7 +463,8 @@ $this->start('script2');
                                 sujet: $( "#speaker-sujet").html(),
                                 photo:  $( "#speaker-photo" ).attr('src'),
                                 twitter: $( "#speaker-twitter").html(),
-                                categorie: $( "#speaker-categorie").html()
+                                categorie: $( "#speaker-categorie").html(),
+                                numbers: data.count_startup
                             });
 
                             socket.emit('change_etape', {
@@ -485,24 +486,6 @@ $this->start('script2');
     ?>
         if($('#show-front').data('use') == 1){
             $("#speaking-start").removeClass('disabled');
-        }
-    <?php
-        endif;
-    ?>
-    <?php
-        if($speaker && $etape->etape == 2):
-    ?>
-        if($('#show-front').data('use') == 1){
-            var socketss = io.connect( 'http://'+window.location.hostname+':3000' );
-            socketss.on( 'synchro_chrono', function( data ) {
-                if(data.starts == 1){
-                    centi=data.cent; // initialise les dixtièmes
-                    secon=data.secon; //initialise les secondes
-                    minu=data.minut ;//initialise les minutes
-                    $('#show-front').addClass('hidden');
-                    $('#speaking-start').removeClass('hidden').trigger('click');
-                }
-            });
         }
     <?php
         endif;

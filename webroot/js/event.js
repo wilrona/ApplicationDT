@@ -7,6 +7,13 @@ $(document).ready(function(){
         }
     });
 
+    $('.canvas-notes').circleProgress({
+        startAngle: -1/2*Math.PI,
+        fill: {
+            gradient: ["red", "orange"]
+        }
+    });
+
     var the_moment;
     // Horloge et date
      var horloges = setInterval(function horloges(){
@@ -58,6 +65,9 @@ $(document).ready(function(){
             $('#presentation').removeClass('hidden');
             $('#speaking-ico').addClass('hidden');
             $('#question-ico').addClass('hidden');
+
+            $("#speaking").removeClass('hidden');
+            $("#end").addClass('hidden');
             clearInterval(the_moment);
         }
 
@@ -67,6 +77,21 @@ $(document).ready(function(){
             $('.moment').removeClass('hidden').data('etape', 2);
             $('#speaking-ico').addClass('hidden');
             $('#question-ico').addClass('hidden');
+            $('#note-chrono').removeClass('note-chrono');
+            $('#speaker-nom').removeClass('note-margin');
+
+            $("#speaking").removeClass('hidden');
+            $("#end").addClass('hidden');
+        }
+
+        if(data.etape == 3){
+            $(".moment").addClass('hidden');
+            $("#speaking").addClass('hidden');
+            $("#end").removeClass('hidden');
+            $('#horloge').html("00&#58;00&#58;0");
+            $('#speaker-twitter').html("@DgitalThursday");
+            $('#ville').addClass('hidden');
+            $(".moment").data('etape', 3);
         }
     });
 
@@ -78,9 +103,10 @@ $(document).ready(function(){
         $( "#speaker-twitter").html(data.twitter);
 
         $("#horloge").removeClass('text-danger');
-        $('#speaking-ico').addClass('hidden');
-        $('#question-ico').addClass('hidden');
+        $('#speaking-ico').addClass('hidden').addClass('blink_me');
+        $('#question-ico').addClass('hidden').addClass('blink_me');
         $('.canvas').circleProgress('value',0);
+        $('.canvas-notes').circleProgress('value',0);
 
         var my_categorie;
         if(data.categorie == 'speaker'){
@@ -92,10 +118,16 @@ $(document).ready(function(){
         }else if(data.categorie == 'partenaire gold'){
             my_categorie = 4;
         }
+
+        $('#note-chrono').removeClass('note-chrono');
+        $('#speaker-nom').removeClass('note-margin');
+        $('#note-view').addClass('hidden');
+        $('#ville').removeClass('hidden');
         $( "#speaker-categorie").html(data.categorie).data('categorie', my_categorie);
-        if($('#TextMoment').prev().html() == ""){
-            $('#TextMoment').prev().remove();
-        }
+        $( "#speaker-categorie").data('startup', data.numbers);
+        //if($('#TextMoment').prev().html() == "" && $(".moment").data('etape') == 0){
+        //    $('#TextMoment').prev().remove();
+        //}
     });
 
 
@@ -106,7 +138,7 @@ $(document).ready(function(){
         var new_moment = data.moment;
         new_moment = new_moment.split(' _ ');
 
-        if($(".moment").data('etape') == 0){
+        if($(".moment").data('etape') == 0 || $(".moment").data('etape') == 3){
             compteur = 0;
         }
 
@@ -117,7 +149,7 @@ $(document).ready(function(){
                 $('#TextMoment').prev().remove();
             }
 
-            if($(".moment").data('etape') == 0){
+            if($(".moment").data('etape') == 0 || $(".moment").data('etape') == 3){
                 $(".moment").removeClass('hidden');
             }
 
@@ -128,7 +160,7 @@ $(document).ready(function(){
             $('#MomentSpeaker1').html(new_moment[0]).removeClass('hidden');
             $('#MomentSpeaker2').html(new_moment[1]).removeClass('hidden').before('<br />');
 
-            if($(".moment").data('etape') == 0) {
+            if($(".moment").data('etape') == 0 || $(".moment").data('etape') == 3) {
                 the_moment = setInterval(function moment(){
                     if (compteur > 20) {
                         if($(".moment").data('etape') == 0) {
@@ -155,7 +187,7 @@ $(document).ready(function(){
                 }
             }
 
-            if($(".moment").data('etape') == 0){
+            if($(".moment").data('etape') == 0 || $(".moment").data('etape') == 3){
                 $(".moment").removeClass('hidden');
             }
 
@@ -171,7 +203,7 @@ $(document).ready(function(){
                 }
             }
 
-            if($(".moment").data('etape') == 0) {
+            if($(".moment").data('etape') == 0 || $(".moment").data('etape') == 3) {
                 the_moment = setInterval(function moment() {
                     if (compteur > 20) {
                         if($(".moment").data('etape') == 0){
@@ -210,6 +242,9 @@ $(document).ready(function(){
     var qmax;
     var ratio;
     var comptes;
+
+    var last_tweet;
+    var last_moyenne;
 
     socket.on( 'start_chrono', function( data ) {
 
@@ -293,7 +328,6 @@ $(document).ready(function(){
 
             reste_max = max - compte;
             qmax = max + reste_max;
-            qmax -= 4;
 
             compte = 1;
             ratio = 0;
@@ -317,6 +351,8 @@ $(document).ready(function(){
             }
 
             qminu += minu;
+            // reduction
+            //qmax -= qminu;
 
             speaker_chrono = setInterval(function chrono(){
 
@@ -334,6 +370,38 @@ $(document).ready(function(){
                     qminu--;
                 } //si les secondes > 59,
 //            on les réinitialise à 0 et on incrémente les minutes de 1
+                $categori = $('#speaker-categorie').data('categorie');
+                if($categori == 2 && qminu < 2){
+                    $('#note-chrono').addClass('note-chrono');
+                    $('#speaker-nom').addClass('note-margin');
+                    $('#note-view').removeClass('hidden');
+                    if(last_tweet == null && last_moyenne == null){
+                        socket = io.connect( 'http://'+window.location.hostname+':3000' );
+                        socket.emit('view_moment', {
+                            moment: "Votez votre startup sur twitter en saisissant #DigitalThursday #Startup"+$('#speaker-categorie').data("startup")+" #votre_note allant de 1 à 5."
+                        });
+                    }
+
+                    if(qsecon == 30 || qsecon == 0){
+                        var url = "/evenement/twitter_note.json";
+                        if(last_moyenne && last_tweet){
+                            url = url+"?last_tweet="+last_tweet+"&moyenne="+last_moyenne;
+                        }
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function (data) {
+                                last_moyenne = data.moyenne;
+                                last_tweet = data.last_tweet;
+                                if(last_moyenne){
+                                    moyenne = last_moyenne / 5;
+                                    $('.canvas-notes').circleProgress('value',moyenne);
+                                    $('#text-note').html(data.moyenne+'/5');
+                                }
+                            }
+                        });
+                    }
+                }
 
                 var space = "";
                 if(qsecon<10){ space = "0"}
@@ -342,6 +410,37 @@ $(document).ready(function(){
                 if(qcenti == 0 && qsecon == 0 && qminu == 0){
                     $("#horloge").addClass('text-danger');
                     $('#question-ico').removeClass('blink_me');
+                    clearInterval(speaker_chrono);
+                }
+            },100);
+        };
+
+        if(data.start_chrono == 4){
+            compte = 0;
+            centi=9; // initialise les dixtièmes
+            secon=59; //initialise les secondes
+            minu=4 ;//initialise les minutes
+
+            $("#horloge").removeClass('text-danger');
+
+            speaker_chrono = setInterval(function chrono(){
+                centi--; //incrémentation des dixièmes de 1
+                if (centi<0){
+                    centi=9;
+                    secon--;
+                } //si les dixièmes > 9,
+//            on les réinitialise à 0 et on incrémente les secondes de 1
+                if (secon<0){secon=59;minu--} //si les secondes > 59,
+//            on les réinitialise à 0 et on incrémente les minutes de 1
+                var space = "";
+                if(secon<10){ space = "0"}
+                $('#horloge').html("0"+minu+"&#58;"+space+""+secon+"&#58;"+centi);
+                if(centi == 0 && secon == 0 && minu == 0){
+                    socket = io.connect( 'http://'+window.location.hostname+':3000' );
+
+                    socket.emit('view_moment', {
+                        moment: "A Bientôt"
+                    });
                     clearInterval(speaker_chrono);
                 }
             },100);

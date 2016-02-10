@@ -57,10 +57,7 @@
                             intervent: data.speaker['intervent']
                         });
 
-                        $('#chrono').removeClass('bg-danger');
-                        $('#speaker-start').addClass('hidden');
-                        $('#speaker-stop').addClass('hidden');
-                        $('#speaker-reset').addClass('hidden');
+
 
                     }else{
                         if(!$('#speaking-start').hasClass('disabled')) {
@@ -71,7 +68,15 @@
                         }
                     }
 
-                    $('#closed').trigger('click');
+                   $('#chrono').removeClass('bg-danger');
+                   $('#speaking-start').addClass('disabled');
+                   $('#speaking-stop').addClass('disabled');
+                   $('#speaking-reset').addClass('disabled');
+
+                   $('#question-start').addClass('disabled');
+                   $('#question-stop').addClass('disabled');
+
+                   $('#closed').trigger('click');
                }
 
            });

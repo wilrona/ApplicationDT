@@ -3,7 +3,6 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\ORM\TableRegistry;
-
 /**
  * Evenement Controller
  *
@@ -11,6 +10,12 @@ use Cake\ORM\TableRegistry;
  */
 class EvenementController extends AppController
 {
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadComponent('Twitter');
+    }
 
     public function index($etape = null)
     {
@@ -101,6 +106,7 @@ class EvenementController extends AppController
                     $speaker['twitter'] = $speak->twitter;
                     $speaker['categorie'] = $intervent->categorie;
                     $speaker['intervent'] = $intervent->id;
+                    $speaker['number'] = $intervent->number;
                     $speaker['actif'] = 1;
                 }
 
@@ -118,7 +124,87 @@ class EvenementController extends AppController
 
         $intervent_actif = $interventionss->find()->where(['actif' => true])->first();
         $intervent_actif->afficher = 1;
+
+        $count_startup = 0;
+
+        if($intervent_actif->categorie == 'startup'){
+
+            $count_startup = $interventionss->find()->where(['categorie' => 'startup', 'number !=' => '0'])->count();
+            if($intervent_actif->number == 0){
+                $count_startup++;
+                $intervent_actif->number = $count_startup;
+            }
+
+        }
+
         $interventionss->save($intervent_actif);
+
+        $this->set(compact('count_startup'));
+    }
+
+    public function twitterNote(){
+
+        $twitter = $this->Twitter->Oauth();
+
+        $interventionss = TableRegistry::get('Intervention');
+
+        $intervent_actif = $interventionss->find()->where(['actif' => true, 'afficher' => true])->first();
+
+        $query = '#DigitalThursday #Startup'.$intervent_actif->number;
+
+        $last_tweet = 0;
+        if($this->request->query('last_tweet')){
+            $last_tweet = $this->request->query('last_tweet');
+            $twitter = $twitter->get('search/tweets', ['q' => $query, 'count' => 10, 'since_id' => $last_tweet]);
+        }else{
+            $twitter = $twitter->get('search/tweets', ['q' => $query, 'count' => 10]);
+        }
+
+        $note = 0;
+        $nbr_tweet = 0;
+        $moyenne = 0;
+
+        foreach($twitter->statuses as $tweet){
+            $text = $tweet->text;
+            $text = explode(" ",$text);
+            if(in_array("#0", $text)){
+                $note = $note + 0;
+            }
+            if(in_array("#1", $text)){
+                $note = $note + 1;
+            }
+            if(in_array("#2", $text)){
+                $note = $note + 2;
+            }
+            if(in_array("#3", $text)){
+                $note = $note + 3;
+            }
+            if(in_array("#4", $text)){
+                $note = $note + 4;
+            }
+            if(in_array("#5", $text)){
+                $note = $note + 5;
+            }
+            $nbr_tweet++;
+        }
+
+        if($nbr_tweet){
+            $moyenne = $note / $nbr_tweet;
+        }
+
+        if($nbr_tweet > 0){
+            if($this->request->query('moyenne')){
+                if($last_tweet != $twitter->statuses[0]->id){
+                    $moyennes = $this->request->query('moyenne');
+                    $moyenne = $moyenne + $moyennes;
+                    $moyenne = $moyenne / 2;
+                }
+            }
+            $last_tweet = $twitter->statuses[0]->id;
+        }
+
+        $this->set(compact('moyenne', 'last_tweet', 'twitter'));
+        $this->set('_serialize', ['moyenne', 'last_tweet', 'twitter']);
     }
 
 

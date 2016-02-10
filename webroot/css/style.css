@@ -4,6 +4,10 @@
 
 /* Links */
 
+body{
+    text-shadow: none !important;
+}
+
 @font-face {
 		font-family: 'HelveticaNeue-Thin';
 		src: url('../fonts/HelveticaNeue-Thin.otf');
@@ -293,13 +297,10 @@ body {
 img#speaker-photo{
     position: absolute;
     margin-top: 22px;
-    margin-left: -89px;
+    margin-left: 22px;
 }
-/*img#speaker-photo{*/
-    /*position: absolute;*/
-    /*margin-top: 12px;*/
-    /*margin-left: 11px;*/
-/*}*/
+
+
 #presentation{
     position: absolute;
     top: 0;
@@ -332,7 +333,7 @@ img#speaker-photo{
 .planet{
     width: 20px;
     position: absolute;
-    left: 70px;
+    left: 0px;
     top: 6px
 }
 

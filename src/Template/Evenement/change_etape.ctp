@@ -30,6 +30,14 @@
 <script>
     $(document).ready(function(){
 
+        $('#ChronoApplaud').on('click', function(e){
+            e.preventDefault();
+            var socket = io.connect( 'http://'+window.location.hostname+':3000' );
+            socket.emit('start_chrono', {
+                start_chrono: 4
+            });
+        });
+
         $('#validation').on('click', function(e){
             e.preventDefault();
             $.ajax({
