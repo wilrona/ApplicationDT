@@ -366,3 +366,26 @@ img#speaker-photo{
     line-height: 220px;
     font-size: 40px;
 }
+
+.header{
+    color: #252a2f !important;
+}
+
+.panel-body {
+    text-align: left;
+    color: #252a2f;
+    text-shadow: none;
+    font-size: 14px;
+}
+
+#live-content{
+    /*padding-top: 45px;*/
+}
+
+#live-content a{
+    color: blue;
+}
+
+#tweet{
+    margin-bottom: 10px !important;
+}

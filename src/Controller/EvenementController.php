@@ -157,15 +157,22 @@ class EvenementController extends AppController
             $last_tweet = $this->request->query('last_tweet');
             $twitter = $twitter->get('search/tweets', ['q' => $query, 'count' => 10, 'since_id' => $last_tweet]);
         }else{
-            $twitter = $twitter->get('search/tweets', ['q' => $query, 'count' => 10]);
+            $twitter = $twitter->get('search/tweets', ['q' => $query]);
         }
 
         $note = 0;
         $nbr_tweet = 0;
         $moyenne = 0;
+        $date_tweet = 0;
+
+        $edition_encours = TableRegistry::get('Edition');
+        $edition_encours = $edition_encours->find()
+            ->orderDesc('date')->first();
 
         foreach($twitter->statuses as $tweet){
             $text = $tweet->text;
+            $date_tweet = \DateTime::createFromFormat("Y-m-d", $this->Twitter->convert_date_tweeter($tweet->created_at));
+
             $text = explode(" ",$text);
             if(in_array("#0", $text)){
                 $note = $note + 0;
@@ -186,6 +193,7 @@ class EvenementController extends AppController
                 $note = $note + 5;
             }
             $nbr_tweet++;
+
         }
 
         if($nbr_tweet){
@@ -203,8 +211,37 @@ class EvenementController extends AppController
             $last_tweet = $twitter->statuses[0]->id;
         }
 
-        $this->set(compact('moyenne', 'last_tweet', 'twitter'));
-        $this->set('_serialize', ['moyenne', 'last_tweet', 'twitter']);
+        $this->set(compact('moyenne', 'last_tweet', 'twitter', 'date_tweet'));
+        $this->set('_serialize', ['moyenne', 'last_tweet', 'twitter', 'date_tweet']);
+    }
+
+    public function live(){
+        $this->viewBuilder()->layout('frontend');
+
+        $twitter = $this->Twitter->Oauth();
+        $autolink = \Twitter_Autolink::create();
+
+        $query = '#DigitalThursday';
+        if($this->request->query('last')){
+            $twitter = $twitter->get('search/tweets', ['q' => $query, 'since_id' => $this->request->query('last'), 'count' => 7]);
+            if($twitter->statuses && $twitter->statuses[0]->id == $this->request->query('last')){
+                $twitter = [];
+            }else if(empty($twitter->statuses)){
+                $twitter = [];
+            }else{
+                foreach($twitter->statuses as $tweet){
+                    $text = $autolink->autoLink($tweet->text);
+                    $tweet->text = $text;
+                }
+                $twitter = $twitter->statuses;
+            }
+        }else{
+            $twitter = $twitter->get('search/tweets', ['q' => $query, 'count' => 7]);
+            $twitter = $twitter->statuses;
+        }
+
+        $this->set(compact('twitter', 'autolink'));
+        $this->set('_serialize', ['twitter', 'autolink']);
     }
 
 

@@ -243,8 +243,9 @@ $(document).ready(function(){
     var ratio;
     var comptes;
 
-    var last_tweet;
-    var last_moyenne;
+    var last_tweet = 0;
+    var last_moyenne = 0;
+    var affiche = 0;
 
     socket.on( 'start_chrono', function( data ) {
 
@@ -325,6 +326,7 @@ $(document).ready(function(){
 
             $('#speaking-ico').addClass('hidden');
             $('#question-ico').removeClass('hidden');
+            affiche = 0;
 
             reste_max = max - compte;
             qmax = max + reste_max;
@@ -371,15 +373,16 @@ $(document).ready(function(){
                 } //si les secondes > 59,
 //            on les réinitialise à 0 et on incrémente les minutes de 1
                 $categori = $('#speaker-categorie').data('categorie');
-                if($categori == 2 && qminu < 2){
+                if($categori == 2 && qminu < 3){
                     $('#note-chrono').addClass('note-chrono');
                     $('#speaker-nom').addClass('note-margin');
                     $('#note-view').removeClass('hidden');
-                    if(last_tweet == null && last_moyenne == null){
+                    if(last_tweet == 0 && last_moyenne == 0 && affiche == 0){
                         socket = io.connect( 'http://'+window.location.hostname+':3000' );
                         socket.emit('view_moment', {
                             moment: "Votez votre startup sur twitter en saisissant #DigitalThursday #Startup"+$('#speaker-categorie').data("startup")+" #votre_note allant de 1 à 5."
                         });
+                        affiche = 1;
                     }
 
                     if(qsecon == 30 || qsecon == 0){

@@ -31,4 +31,9 @@ class TwitterComponent extends Component
         return $twitter;
     }
 
+    public function convert_date_tweeter($date){
+        $mysql_format = date("Y-m-d", strtotime($date));
+        return $mysql_format;
+    }
+
 }

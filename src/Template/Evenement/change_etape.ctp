@@ -71,7 +71,7 @@
                         var socketss = io.connect( 'http://'+window.location.hostname+':3000' );
 
                         socketss.emit('view_moment', {
-                            moment: "Bienvenu aux Digital Thursday"
+                            moment: "Bienvenue aux Digital Thursday"
                         });
                     }
                     if(data.etape == 2){
